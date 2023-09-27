@@ -3,6 +3,9 @@ import { getAllTodos } from "../redux/actions/api";
 import { useDispatch, useSelector } from "react-redux";
 import { Todo } from "./Todo";
 import Tabs from "./Tabs";
+import { deleteTodo } from "../redux/actions/api";
+
+import { ALL_TODOS,DONE_TODOS,ACTIVE_TODOS } from "../redux/actions/type";
 
 
 export const Todos = () => {
@@ -14,15 +17,43 @@ export const Todos = () => {
   useEffect(() => {
     dispatch(getAllTodos());
   }, []);
+
+  const getTodos = () => {
+    if(currentTab === ALL_TODOS){
+      return todos;
+    }else if(currentTab === ACTIVE_TODOS){
+      return todos.filter(todo => !todo.done)
+    }
+    else if(currentTab === DONE_TODOS){
+      return todos.filter(todo => todo.done)
+    } 
+  }
+
+  const removeDoneTodos = () => {
+    todos.forEach(({done , _id}) => {
+      if(done){
+        dispatch(deleteTodo(_id))
+      }
+    })
+
+  }
+
   return (
     <>
       <article>
         <div>
             <Tabs currentTab = { currentTab } />
+
+            {
+              todos.some(todo => todo.done) ? (
+                <button onClick={removeDoneTodos}
+                className="button clear">Remove done todo</button>
+              ):null
+            }
         </div>
         <ul>
             {
-                todos.map( todo =>(
+                getTodos().map( todo =>(
                    <Todo
                    key = {todo._id}
                    todo = {todo} />
